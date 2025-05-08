@@ -38,6 +38,8 @@ class StayPoint():
     def __init__(self, config):
         self.input_folder = config.input_folder
         self.output_folder = config.output_folder
+        self.dist_threshold = config.dist_threshold, 
+        self.time_threshold = config.time_threshold, 
         if config.sql == True:
             self.db_path = config.db_path
             self.batch_size = config.batch_size
@@ -172,11 +174,11 @@ class StayPoint():
     def _generate_staypoints_sliding_user(
         self,
         df, # 输入数据
-        dist_threshold = 200, # 大部分的移动距离在200m一下
-        time_threshold = 30, # timing数据采样时间在30min左右，时间阈值要大于30分钟
-        gap_threshold = 1440, # 信号间断时间暂定为1天
-        geo_col = 'geometry', # 需要使用geopandas建立几何图形 需要坐标系统
-        include_last=True, # 不包含最后一个采样点
+        dist_threshold = self.dist_threshold, 
+        time_threshold = self.time_threshold, 
+        gap_threshold = 1440, # 信号间断时间定为1天
+        geo_col = 'geometry', 
+        include_last=True, # 包含最后一个采样点
     ):
         """
             User level staypoint generation using sliding method, 

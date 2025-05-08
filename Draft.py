@@ -21,7 +21,7 @@ class DriftData():
         self.db_path = config.db_path
         # 分批次处理
         self.batch_size = config.batch_size
-
+        self.speed = config.speed
     def process_sql(self):
         # 确保输出文件夹存在
         if not os.path.exists(self.output_folder):
@@ -182,7 +182,7 @@ class DriftData():
                     break
                 continue
 
-            if speed > 27.8 or speed == 0:
+            if speed > self.speed or speed == 0:
                 indexes_to_drop.append(i + count)
                 count += 1 # 在索引中跳过漂移点
                 if i + count >= len(df):

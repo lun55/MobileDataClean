@@ -6,9 +6,9 @@ from easydict import EasyDict as edict
 if __name__ == "__main__":
 
   
-    dataset = 'Timing'
-    area = ''
-    mouth = ''
+    dataset = 'Timing' # 数据集 
+    area = '' # 研究区
+    mouth = '' # 月份
     geo_config = edict({
         'Area_path': f"H:\研究区\{area}.shp",  # 城市矢量文件路径
         'input_folder': r"", # 输入数据路径 
@@ -19,11 +19,14 @@ if __name__ == "__main__":
         'db_path': f'D:\data_draft_{area}.db', 
         'input_folder': fr"H:\处理\{area}\区域筛选\{dataset}\{mouth}",
         'output_folder': fr'E:\四大城市\处理\{area}\漂移点清洗\{dataset}\{mouth}',
+        'speed': 27.8, # 速度，单位m/s
         'batch_size': 300000 
     })
     stay_config = edict({
         'input_folder': f'E:\四大城市\处理\{area}\漂移点清洗\{dataset}\{mouth}',
         'output_folder': f'E:\四大城市\处理\{area}\停留点\{dataset}\{mouth}',   # 最终结果路径
+        'dist_threshold': 200, # 距离阈值
+        'time_threshold': 30, # 时间阈值
         'sql': True,  #  内存不够时，使用数据库进行缓冲
         'db_path': f'D:\data_stay_{area}.db', 
         'batch_size': 300000 
