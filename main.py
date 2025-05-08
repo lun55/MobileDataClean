@@ -5,11 +5,7 @@ from easydict import EasyDict as edict
 
 if __name__ == "__main__":
 
-    '''
-        城市：福州 厦门 漳州 泉州
-        数据集: Timing  WifiConnect  WifiStable
-    '''
-
+  
     dataset = 'Timing'
     area = ''
     mouth = ''
