@@ -19,26 +19,23 @@ if __name__ == "__main__":
         'db_path': f'D:\data_draft_{area}.db', 
         'input_folder': fr"H:\处理\{area}\区域筛选\{dataset}\{mouth}",
         'output_folder': fr'E:\四大城市\处理\{area}\漂移点清洗\{dataset}\{mouth}',
-        'speed': 27.8, # 速度，单位m/s
         'batch_size': 300000 
     })
     stay_config = edict({
-        'input_folder': f'E:\四大城市\处理\{area}\漂移点清洗\{dataset}\{mouth}',
-        'output_folder': f'E:\四大城市\处理\{area}\停留点\{dataset}\{mouth}',   # 最终结果路径
-        'dist_threshold': 200, # 距离阈值
-        'time_threshold': 30, # 时间阈值
+        'input_folder': fr'H:\处理\泉州\漂移清洗\6月',
+        'output_folder': fr'H:\处理\泉州\停留点\6月',   # 最终结果路径
         'sql': True,  #  内存不够时，使用数据库进行缓冲
         'db_path': f'D:\data_stay_{area}.db', 
         'batch_size': 300000 
     })
-    # # 区域筛选
-    print("-"*10 + "区域筛选"+"-"*20)
-    GeographicF(geo_config).process()
-    # 漂移点清洗
-    print("-"*10 + "漂移点清洗"+"-"*20)
-    DriftData(draft_config).process_sql()
-    # # 停留点识别
-    print("-"*10 + "停留点识别"+"-"*20)
+    # # # 区域筛选
+    # print("-"*10 + "区域筛选"+"-"*20)
+    # GeographicF(geo_config).process()
+    # # 漂移点清洗
+    # print("-"*10 + "漂移点清洗"+"-"*20)
+    # DriftData(draft_config).process_sql()
+    # # # 停留点识别
+    # print("-"*10 + "停留点识别"+"-"*20)
     # StayPoint(stay_config).process()
     # # 内存不足时，停留点识别时使用下面这个
     StayPoint(stay_config).process_sql() 

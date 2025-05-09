@@ -38,8 +38,6 @@ class StayPoint():
     def __init__(self, config):
         self.input_folder = config.input_folder
         self.output_folder = config.output_folder
-        self.dist_threshold = config.dist_threshold, 
-        self.time_threshold = config.time_threshold, 
         if config.sql == True:
             self.db_path = config.db_path
             self.batch_size = config.batch_size
@@ -174,8 +172,8 @@ class StayPoint():
     def _generate_staypoints_sliding_user(
         self,
         df, # 输入数据
-        dist_threshold = self.dist_threshold, 
-        time_threshold = self.time_threshold, 
+        dist_threshold = 200, 
+        time_threshold = 30, 
         gap_threshold = 1440, # 信号间断时间定为1天
         geo_col = 'geometry', 
         include_last=True, # 包含最后一个采样点
