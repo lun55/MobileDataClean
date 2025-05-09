@@ -50,7 +50,7 @@ class ODExtract():
                 else:
                     print("未找到月份")
         
-        area_match = re.search(r"\\([^\\]+)\\停留点\\", csv_file)
+        area_match = re.search(r"\\停留点\\([^\\]+)", csv_file)
         if area_match:
             study_area = area_match.group(1)
 
