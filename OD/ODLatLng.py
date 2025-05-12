@@ -4,23 +4,18 @@ import re
 from multiprocessing import Pool
 from tqdm import tqdm
 import pandas as pd
-import geopandas as gpd
 from easydict import EasyDict as edict
 
 '''
-    将坐标点映射到区域格网
+    批量生成OD数据(使用的经纬度)
 '''
 
-class ODFlowExtract():
+class ODExtractLat():
     def __init__(self, config):
-        self.Area_path = config.Area_path  
         self.input_folder = config.input_folder
         self.output_folder = config.output_folder
         self.if_month = config.if_month # 是否按月份输出文件
         self.processes = config.processes
-        self.Area = gpd.read_file(self.Area_path)
-        self.Area.to_crs(epsg=4326, inplace=True)
-
 
     def process(self):
         # 获取所有CSV文件
@@ -56,42 +51,49 @@ class ODFlowExtract():
         area_match = re.search(r"\\停留点\\([^\\]+)", csv_file)
         if area_match:
             study_area = area_match.group(1)
-  
+
         # 动态构建路径层级（跳过空值）
         path_parts = [self.output_folder]
         if study_area: path_parts.append(study_area)
         if month: path_parts.append(month)
         output_folder = os.path.join(*path_parts)
-        # 确保输出文件夹存在
+         # 确保输出文件夹存在
         os.makedirs(output_folder, exist_ok=True)
         output_file = os.path.join(output_folder, basename)
-        if os.path.exists(output_file):
-            print(f"已存在 {output_file}")
-            return
 
         df = pd.read_csv(csv_file)
-        # 将数据块转换为GeoDataFrame
-        gdf = gpd.GeoDataFrame(df, geometry=gpd.points_from_xy(df.longitude, df.latitude))
-        gdf.crs = "EPSG:4326"
-        # 空间连接
-        new_points = gpd.sjoin(gdf, self.Area, how='left')
-        new_points.dropna(subset=['FID'], inplace=True)
-        new_points['FID'] = new_points['FID'].astype(int)
-        new_points.drop(['index_right','geometry','longitude','latitude'], axis=1, inplace=True)
-        new_points.to_csv(output_file, index=False, header=True)
+        # 转换时间格式
+        df['started_at'] = pd.to_datetime(df['started_at'], format='%Y-%m-%d %H:%M:%S')
+
+        # 按用户ID和开始时间排序
+        df = df.sort_values(by=["ID", "started_at"])
+
+        # 获取下一条记录的信息
+        df["arrival_time"] = df.groupby("ID")["started_at"].shift(-1)
+        df["d_lng"] = df.groupby("ID")["longitude"].shift(-1)
+        df["d_lat"] = df.groupby("ID")["latitude"].shift(-1)
+
+        # 重命名列并选择需要的列
+        result = df.rename(columns={
+            "ID": "id",
+            "finished_at": "departure_time",
+            "longitude": "o_lng",
+            "latitude": "o_lat"
+        })[['id', 'departure_time', 'o_lng', 'o_lat', 'arrival_time', 'd_lng', 'd_lat']]
+
+        # 移除没有下一站的记录（最后一条记录）
+        result = result.dropna(subset=['arrival_time'])
+        result.to_csv(output_file, index=False, header=True)
+        print(f"文件 {csv_file} 已处理并保存为 {output_file}")
 
 
 if __name__ == "__main__":
 
-    
-    cities = ["福州", "厦门", "漳州", "泉州", "宁德", "莆田"]  # 所有城市列表
-    for area in cities:
-        odflow_config = edict({
-            'Area_path': fr"E:\四大城市\格网\200\{area}.shp",  # 城市格网矢量文件路径
-            'input_folder': f'H:\结果数据\停留点\{area}',  # 停留点数据路径
-            'output_folder': r'H:\结果数据\格网映射\200',  # OD文件输出路径
-            'if_month': True,  # 是否按照月份分类
-            'processes': 5  # 并发进程数量
-        })
-        # 处理当前城市
-        ODFlowExtract(odflow_config).process()
+    od_config = edict({
+        'input_folder': f'', # 停留点数据路径
+        'output_folder': f'', # OD文件输出路径
+        'if_month': True, # 是否按照月份分类
+        'processes': 5 # 并发进程数量
+    })
+    # 批量提取OD数据
+    ODExtract(od_config).process()

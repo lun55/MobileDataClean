@@ -7,7 +7,7 @@ import pandas as pd
 from easydict import EasyDict as edict
 
 '''
-    批量生成OD数据
+    批量生成OD数据(基于格网)
 '''
 
 class ODExtract():
