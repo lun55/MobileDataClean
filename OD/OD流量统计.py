@@ -22,7 +22,6 @@ class ODFlowExtract():
         if not os.path.exists(self.output_folder):
             os.makedirs(self.output_folder)
 
-
     def process(self):
         # 获取所有CSV文件
         csv_files = glob.glob(os.path.join(self.input_folder, "**/*.csv"), recursive=True)
