@@ -52,7 +52,8 @@ class ODExtract():
         area_match = re.search(fr"\\{self.width}\\([^\\]+)", csv_file)
         if area_match:
             study_area = area_match.group(1)
-
+        else:
+            print("未找到城市名")
         # 动态构建路径层级（跳过空值）
         path_parts = [self.output_folder]
         if study_area: path_parts.append(study_area)

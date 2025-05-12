@@ -12,22 +12,22 @@ if __name__ == "__main__":
 
     dataset = 'Timing' # 数据集 
     area = '' # 研究区
-    mouth = '' # 月份
+    month = '' # 月份
     geo_config = edict({
         'Area_path': f"H:\研究区\{area}.shp",  # 城市矢量文件路径
         'input_folder': r"", # 输入数据路径 
         'dataset': dataset,
-        'output_folder': f"H:\处理\区域筛选\{area}\{dataset}\{mouth}"
+        'output_folder': f"H:\处理\区域筛选\{area}\{dataset}\{month}"
     })
     draft_config = edict({
         'db_path': f'D:\data_draft_{area}.db', 
-        'input_folder': fr"H:\处理\区域筛选\{area}\{dataset}\{mouth}",
-        'output_folder': fr'E:\四大城市\处理\漂移点清洗\{area}\{dataset}\{mouth}',
+        'input_folder': fr"H:\处理\区域筛选\{area}\{dataset}\{month}",
+        'output_folder': fr'E:\四大城市\处理\漂移点清洗\{area}\{dataset}\{month}',
         'batch_size': 300000 # 每此处理的批次大小
     })
     stay_config = edict({
-        'input_folder': fr'E:\四大城市\处理\漂移点清洗\{area}\{dataset}\{mouth}',
-        'output_folder': fr'H:\结果数据\停留点\{area}\{mouth}',   # 最终结果路径
+        'input_folder': fr'E:\四大城市\处理\漂移点清洗\{area}\{dataset}\{month}',
+        'output_folder': fr'H:\结果数据\停留点\{area}\{month}',   # 最终结果路径
         'sql': True,  #  内存不够时，使用数据库进行缓冲
         'db_path': f'D:\data_stay_{area}.db', 
         'batch_size': 300000 # 每此处理的批次大小
