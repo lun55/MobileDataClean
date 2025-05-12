@@ -12,7 +12,7 @@ import geopandas as gpd
 '''
 class GeographicF():
     def __init__(self, config):
-        self.Area_path = config.Area_path  # 修正拼写错误
+        self.Area_path = config.Area_path  
         self.input_folder = config.input_folder
         self.output_folder = config.output_folder
         self.columns_to_save = ['脱敏ID', '经度', '纬度', '开始时间']

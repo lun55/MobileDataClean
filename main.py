@@ -22,8 +22,8 @@ if __name__ == "__main__":
         'batch_size': 300000 
     })
     stay_config = edict({
-        'input_folder': fr'H:\处理\泉州\漂移清洗\6月',
-        'output_folder': fr'H:\处理\泉州\停留点\6月',   # 最终结果路径
+        'input_folder': fr'H:\结果数据\漂移清洗\泉州\6月',
+        'output_folder': fr'H:\结果数据\停留点\泉州\6月',   # 最终结果路径
         'sql': True,  #  内存不够时，使用数据库进行缓冲
         'db_path': f'D:\data_stay_{area}.db', 
         'batch_size': 300000 

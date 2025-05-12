@@ -4,18 +4,24 @@ import re
 from multiprocessing import Pool
 from tqdm import tqdm
 import pandas as pd
+import geopandas as gpd
 from easydict import EasyDict as edict
 
 '''
-    批量生成OD数据
+    按天统计OD流量
 '''
 
-class ODExtract():
+class ODFlowExtract():
     def __init__(self, config):
+ 
         self.input_folder = config.input_folder
         self.output_folder = config.output_folder
         self.if_month = config.if_month # 是否按月份输出文件
         self.processes = config.processes
+        # 确保输出文件夹存在
+        if not os.path.exists(self.output_folder):
+            os.makedirs(self.output_folder)
+
 
     def process(self):
         # 获取所有CSV文件
@@ -48,52 +54,43 @@ class ODExtract():
                 else:
                     print("未找到月份")
         
-        area_match = re.search(r"\\停留点\\([^\\]+)", csv_file)
+        area_match = re.search(r"\\OD\\([^\\]+)", csv_file)
         if area_match:
             study_area = area_match.group(1)
-
+  
         # 动态构建路径层级（跳过空值）
         path_parts = [self.output_folder]
         if study_area: path_parts.append(study_area)
         if month: path_parts.append(month)
         output_folder = os.path.join(*path_parts)
-         # 确保输出文件夹存在
         os.makedirs(output_folder, exist_ok=True)
         output_file = os.path.join(output_folder, basename)
 
         df = pd.read_csv(csv_file)
         # 转换时间格式
-        df['started_at'] = pd.to_datetime(df['started_at'], format='%Y-%m-%d %H:%M:%S')
+        df['departure_time'] = pd.to_datetime(df['departure_time'], format='%Y-%m-%d %H:%M:%S')
+        df["time"] = df["departure_time"].dt.hour * 4 + df["departure_time"].dt.minute // 15
+        # 统计OD流量（按O点、D点、时间段分组）
+        od_flows = (
+             df.groupby(['O_id', 'D_id', 'time'])
+            .size()
+            .reset_index(name='flow')
+        )
+        od_flows['O_id'] = od_flows['O_id'].astype(int)
+        od_flows['D_id'] = od_flows['D_id'].astype(int)
+        od_flows['time'] = od_flows['time'].astype(int)
 
-        # 按用户ID和开始时间排序
-        df = df.sort_values(by=["ID", "started_at"])
-
-        # 获取下一条记录的信息
-        df["arrival_time"] = df.groupby("ID")["started_at"].shift(-1)
-        df["d_lng"] = df.groupby("ID")["longitude"].shift(-1)
-        df["d_lat"] = df.groupby("ID")["latitude"].shift(-1)
-
-        # 重命名列并选择需要的列
-        result = df.rename(columns={
-            "ID": "id",
-            "finished_at": "departure_time",
-            "longitude": "o_lng",
-            "latitude": "o_lat"
-        })[['id', 'departure_time', 'o_lng', 'o_lat', 'arrival_time', 'd_lng', 'd_lat']]
-
-        # 移除没有下一站的记录（最后一条记录）
-        result = result.dropna(subset=['arrival_time'])
-        result.to_csv(output_file, index=False, header=True)
+        od_flows.to_csv(output_file, index=False, header=True)
         print(f"文件 {csv_file} 已处理并保存为 {output_file}")
 
 
 if __name__ == "__main__":
 
-    od_config = edict({
-        'input_folder': f'', # 停留点数据路径
-        'output_folder': f'', # OD文件输出路径
+    odflow_config = edict({
+        'input_folder': f'H:\结果数据\OD', # OD文件数据路径
+        'output_folder': f'H:\结果数据\OD流量', # OD流输出路径
         'if_month': True, # 是否按照月份分类
-        'processes': 5 # 并发进程数量
+        'processes': 10 # 并发进程数量
     })
     # 批量提取OD数据
-    ODExtract(od_config).process()
+    ODFlowExtract(odflow_config).process()

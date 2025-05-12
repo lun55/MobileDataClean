@@ -16,6 +16,7 @@ class ODExtract():
         self.output_folder = config.output_folder
         self.if_month = config.if_month # 是否按月份输出文件
         self.processes = config.processes
+        self.width = config.width
 
     def process(self):
         # 获取所有CSV文件
@@ -48,7 +49,7 @@ class ODExtract():
                 else:
                     print("未找到月份")
         
-        area_match = re.search(r"\\停留点\\([^\\]+)", csv_file)
+        area_match = re.search(fr"\\{self.width}\\([^\\]+)", csv_file)
         if area_match:
             study_area = area_match.group(1)
 
@@ -70,16 +71,15 @@ class ODExtract():
 
         # 获取下一条记录的信息
         df["arrival_time"] = df.groupby("ID")["started_at"].shift(-1)
-        df["d_lng"] = df.groupby("ID")["longitude"].shift(-1)
-        df["d_lat"] = df.groupby("ID")["latitude"].shift(-1)
+        df["D_id"] = df.groupby("ID")["FID"].shift(-1)
+
 
         # 重命名列并选择需要的列
         result = df.rename(columns={
-            "ID": "id",
+            "ID": "user_id",
             "finished_at": "departure_time",
-            "longitude": "o_lng",
-            "latitude": "o_lat"
-        })[['id', 'departure_time', 'o_lng', 'o_lat', 'arrival_time', 'd_lng', 'd_lat']]
+            "FID": "O_id"
+        })[['user_id', 'departure_time', 'O_id', 'arrival_time', 'D_id']]
 
         # 移除没有下一站的记录（最后一条记录）
         result = result.dropna(subset=['arrival_time'])
@@ -89,9 +89,12 @@ class ODExtract():
 
 if __name__ == "__main__":
 
+    width = 200
+
     od_config = edict({
-        'input_folder': f'', # 停留点数据路径
-        'output_folder': f'', # OD文件输出路径
+        'input_folder': fr'H:\结果数据\格网映射\{width}', # 停留点数据路径
+        'output_folder': f'H:\结果数据\OD', # OD文件输出路径
+        'width': width,
         'if_month': True, # 是否按照月份分类
         'processes': 5 # 并发进程数量
     })
