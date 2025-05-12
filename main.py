@@ -5,6 +5,7 @@ from easydict import EasyDict as edict
 
 '''
     停留点提取汇总执行文件
+    瓶颈在内存和CPU
 '''
 
 if __name__ == "__main__":
