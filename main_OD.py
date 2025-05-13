@@ -5,7 +5,6 @@ from easydict import EasyDict as edict
 '''
     OD 提取流程汇总执行文件
     提取停留点后执行
-    瓶颈在IO读写
 '''
 
 if __name__ == "__main__":
