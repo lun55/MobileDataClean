@@ -96,4 +96,4 @@ if __name__ == "__main__":
         'processes': 5 # 并发进程数量
     })
     # 批量提取OD数据
-    ODExtract(od_config).process()
+    ODExtractLat(od_config).process()
