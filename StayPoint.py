@@ -232,9 +232,9 @@ class StayPoint():
         ret_sp = pd.DataFrame(ret_sp)
 
         ret_sp["ID"] = df["ID"].unique()[0]
-        # 去掉只有一个停留点或者没有停留点的用户
-        if(len(ret_sp)<2):
-            return pd.DataFrame()
+        # # 去掉只有一个停留点或者没有停留点的用户
+        # if(len(ret_sp)<2):
+        #     return pd.DataFrame()
         return ret_sp
 
     # 创建新的停留点
