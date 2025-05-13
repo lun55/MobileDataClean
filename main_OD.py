@@ -16,7 +16,7 @@ if __name__ == "__main__":
         fishnet_config = edict({
             'Area_path': fr"E:\四大城市\研究区\{width}\{area}.shp",  # 城市格网矢量文件路径
             'input_folder': f'H:\结果数据\停留点\{area}',  # 停留点数据路径
-            'output_folder': rf'H:\结果数据\格网映射\{width}',  # OD文件输出路径
+            'output_folder': rf'E:\结果数据\格网映射\{width}',  # OD文件输出路径
             'if_month': True,  # 是否按照月份分类
             'processes': 7  # 并发进程数量
         })
@@ -25,8 +25,8 @@ if __name__ == "__main__":
 
    
     od_config = edict({
-        'input_folder': fr'H:\结果数据\格网映射\{width}', # 停留点数据路径
-        'output_folder': f'H:\结果数据\{width}\OD', # OD文件输出路径
+        'input_folder': fr'E:\结果数据\格网映射\{width}', # 停留点数据路径
+        'output_folder': f'E:\结果数据\{width}\OD', # OD文件输出路径
         'width': width,
         'if_month': True, # 是否按照月份分类
         'processes': 7 # 并发进程数量
@@ -36,8 +36,8 @@ if __name__ == "__main__":
 
 
     odflow_config = edict({
-        'input_folder': f'H:\结果数据\{width}\OD', # OD文件数据路径
-        'output_folder': f'H:\结果数据\OD流量\{width}', # OD流输出路径
+        'input_folder': f'E:\结果数据\{width}\OD', # OD文件数据路径
+        'output_folder': f'E:\结果数据\OD流量\{width}', # OD流输出路径
         'if_month': True, # 是否按照月份分类
         'processes': 10 # 并发进程数量
     })

@@ -77,8 +77,7 @@ class FishnetCode():
         new_points = gpd.sjoin(gdf, self.Area, how='left')
         new_points.dropna(subset=['FID'], inplace=True)
         new_points['FID'] = new_points['FID'].astype(int)
-        new_points.drop(['index_right','geometry','longitude','latitude'], axis=1, inplace=True)
-        new_points.to_csv(output_file, index=False, header=True)
+        new_points[['started_at','finished_at','ID','FID']].to_csv(output_file, index=False, header=True)
 
 
 if __name__ == "__main__":
