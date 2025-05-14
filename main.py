@@ -9,7 +9,7 @@ from easydict import EasyDict as edict
 
 if __name__ == "__main__":
 
-    dataset = 'Timing' # 数据集 
+    dataset = 'Timing' # 数据集
     area = '' # 研究区
     month = '' # 月份
     geo_config = edict({

@@ -4,6 +4,7 @@ import re
 import logging
 from datetime import datetime
 from multiprocessing import Pool
+import multiprocessing
 from tqdm import tqdm
 import pandas as pd
 import geopandas as gpd
@@ -28,13 +29,13 @@ class GeographicFChina():
     def process(self):
         # 获取所有CSV文件
         csv_files = glob.glob(os.path.join(self.input_folder, "**/*.csv"), recursive=True)
-        
-        # 使用多进程处理文件
-        with Pool(processes=12) as pool:
-            # 使用实例方法包装函数，以便传递self
-            list(tqdm(pool.imap(self._process_file, csv_files), 
-                     total=len(csv_files), 
-                     desc="处理文件中"))
+        self._process_file(csv_files[0])
+        # # 使用多进程处理文件
+        # with Pool(processes=12) as pool:
+        #     # 使用实例方法包装函数，以便传递self
+        #     list(tqdm(pool.imap(self._process_file, csv_files), 
+        #              total=len(csv_files), 
+        #              desc="处理文件中"))
 
    
     def _process_chunk(self, chunk, output_path):
@@ -111,24 +112,36 @@ class GeographicFChina():
 
         print(f"开始处理 {csv_file}")
         # 分块读取CSV文件
-        chunk_size = 1000000
+        chunk_size = 3000000
         for chunk in pd.read_csv(csv_file, chunksize=chunk_size, usecols=self.columns_to_save):
             self._process_chunk(chunk, output_path)
         
         print(f"文件 {csv_file} 已处理并保存在 {output_path}")
         logging.info(f"文件 {csv_file} 已处理并保存在 {output_path}")
 
+
+def process_area(args):
+    area, input_path = args
+    dataset = 'Timing'  # 数据集 
+    month = '9月'  # 月份
+    geo_config = edict({
+        'Area_path': r"E:\四大城市\研究区\全国\市级.shp",  # 城市矢量文件路径
+        'input_folder': input_path,  # 输入数据路径 
+        'dataset': dataset,
+        'output_folder': f"H:\全国城市\{area}\{dataset}\{month}"
+    })
+    GeographicFChina(geo_config).process()
+
 if __name__ == "__main__":
-    input_list = [r"E:\4个城市\珠海"]
-    area_list = ['珠海']
-    for i in range(len(area_list)):
-        dataset = 'Timing' # 数据集 
-        month = '4月' # 月份
-        area = area_list[i]
-        geo_config = edict({
-            'Area_path': f"E:\四大城市\研究区\全国\市级.shp",  # 城市矢量文件路径
-            'input_folder':input_list[i], # 输入数据路径 
-            'dataset': dataset,
-            'output_folder': f"H:\全国城市\{area}\{dataset}\{month}"
-        })
-        GeographicFChina(geo_config).process()
+    input_list = [r"E:\6个城市\福州", r"E:\6个城市\厦门", r"E:\6个城市\泉州", 
+                  r"E:\6个城市\宁德", r"E:\6个城市\莆田", r"E:\6个城市\漳州"]
+    area_list = ['福州','厦门', '泉州', '宁德', '莆田', '漳州']
+    
+    args = zip(area_list, input_list)
+    
+    with Pool() as pool:  # 使用 with 语句自动管理资源
+        # args = zip(area_list, input_list)
+        # pool.map(process_area, args)
+        list(tqdm(pool.imap(process_area, args), 
+                total=len(area_list), 
+                desc="处理文件中"))
