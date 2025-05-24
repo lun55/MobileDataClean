@@ -18,6 +18,7 @@ class ODFlowExtract():
         self.output_folder = config.output_folder
         self.if_month = config.if_month # 是否按月份输出文件
         self.processes = config.processes
+        self.if_OD = config.if_OD # 是按照OD流输出 还是按照DO流输出
         # 确保输出文件夹存在
         if not os.path.exists(self.output_folder):
             os.makedirs(self.output_folder)
@@ -52,10 +53,10 @@ class ODFlowExtract():
                     month = match.group(1) + "月"
                 else:
                     print("未找到月份")
-        
-        area_match = re.search(r"\\OD\\([^\\]+)", csv_file)
-        if area_match:
-            study_area = area_match.group(1)
+        study_area = csv_file.split("\\")[-3]
+        # area_match = re.search(r"\\OD\\([^\\]+)", csv_file)
+        # if area_match:
+        #     study_area = area_match.group(1)
   
         # 动态构建路径层级（跳过空值）
         path_parts = [self.output_folder]
@@ -66,21 +67,36 @@ class ODFlowExtract():
         output_file = os.path.join(output_folder, basename)
 
         df = pd.read_csv(csv_file)
-        # 转换时间格式
-        df['departure_time'] = pd.to_datetime(df['departure_time'], format='%Y-%m-%d %H:%M:%S')
-        df["time"] = df["departure_time"].dt.hour * 4 + df["departure_time"].dt.minute // 15
-        # 统计OD流量（按O点、D点、时间段分组）
-        od_flows = (
-             df.groupby(['O_id', 'D_id', 'time'])
-            .size()
-            .reset_index(name='flow')
-        )
-        od_flows['O_id'] = od_flows['O_id'].astype(int)
-        od_flows['D_id'] = od_flows['D_id'].astype(int)
-        od_flows['time'] = od_flows['time'].astype(int)
-
-        od_flows.to_csv(output_file, index=False, header=True)
-        print(f"文件 {csv_file} 已处理并保存为 {output_file}")
+        if(self.if_OD):
+            # 转换时间格式 arrival_time
+            df['departure_time'] = pd.to_datetime(df['departure_time'], format='%Y-%m-%d %H:%M:%S')
+            df["time"] = df["departure_time"].dt.hour * 4 + df["departure_time"].dt.minute // 15
+            # 统计OD流量（按O点、D点、时间段分组）
+            od_flows = (
+                df.groupby(['O_id', 'D_id', 'time'])
+                .size()
+                .reset_index(name='flow')
+            )
+            od_flows['O_id'] = od_flows['O_id'].astype(int)
+            od_flows['D_id'] = od_flows['D_id'].astype(int)
+            od_flows['time'] = od_flows['time'].astype(int)
+            od_flows.to_csv(output_file, index=False, header=True)
+            print(f"文件 {csv_file} 已处理并保存为 {output_file}")
+        else:
+            # 转换时间格式 arrival_time
+            df['arrival_time'] = pd.to_datetime(df['arrival_time'], format='%Y-%m-%d %H:%M:%S')
+            df["time"] = df["arrival_time"].dt.hour * 4 + df["arrival_time"].dt.minute // 15
+            # 统计OD流量（按O点、D点、时间段分组）
+            od_flows = (
+                df.groupby(['D_id', 'O_id', 'time'])
+                .size()
+                .reset_index(name='flow')
+            )
+            od_flows['O_id'] = od_flows['O_id'].astype(int)
+            od_flows['D_id'] = od_flows['D_id'].astype(int)
+            od_flows['time'] = od_flows['time'].astype(int)
+            od_flows[['D_id','O_id','time','flow']].to_csv(output_file, index=False, header=True)
+            print(f"文件 {csv_file} 已处理并保存为 {output_file}")
 
 
 if __name__ == "__main__":

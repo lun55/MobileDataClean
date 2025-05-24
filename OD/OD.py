@@ -74,7 +74,6 @@ class ODExtract():
         df["arrival_time"] = df.groupby("ID")["started_at"].shift(-1)
         df["D_id"] = df.groupby("ID")["FID"].shift(-1)
 
-
         # 重命名列并选择需要的列
         result = df.rename(columns={
             "ID": "user_id",
