@@ -10,7 +10,7 @@ from easydict import EasyDict as edict
 if __name__ == "__main__":
     
     cities = ["福州", "厦门", "漳州", "泉州", "宁德", "莆田"]  # 所有城市列表
-    width = "村级"
+    width = "200"
     # print("-"*10 + "格网映射" + "10"*10)
     # for area in cities:
     #     fishnet_config = edict({
@@ -40,7 +40,7 @@ if __name__ == "__main__":
         'input_folder': f'H:\结果数据\OD\{width}', # OD文件数据路径
         'output_folder': f'H:\结果数据\DO流量\{width}', # OD流输出路径
         'if_month': True, # 是否按照月份分类
-        'if_OD': False, # 是否按照月份分类
+        'if_OD': False, # 是否是OD
         'processes': 10 # 并发进程数量
     })
     # 批量提取OD流数据  
