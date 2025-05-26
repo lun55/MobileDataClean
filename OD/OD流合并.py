@@ -10,8 +10,7 @@ import numpy as np
 from itertools import product
 
 '''
-    生成流量矩阵 文件太大
-    格式[time O D] 或者 [time D O]
+    生成OD流聚合文件  ['id', 'time', 'O_flow','D_flow']
 '''
 
 class ODMatrix():
@@ -21,6 +20,7 @@ class ODMatrix():
         self.input_DO_folder = config.input_DO_folder
         self.output_folder = config.output_folder
         self.if_month = config.if_month # 是否按月份输出文件
+        self.if_all = config.if_all # 是否按月份输出文件
         self.processes = config.processes
         self.area_dic = config.area_dic
         # 确保输出文件夹存在
@@ -82,24 +82,28 @@ class ODMatrix():
         # 2. 重命名以统一字段名
         o_flow_df = o_flow_df.rename(columns={'O_id': 'id'})
         d_flow_df = d_flow_df.rename(columns={'D_id': 'id'})
-        all_ids = [i for i in range(self.area_dic[study_area])]
-        all_times = [i for i in range(96)]
-        # 3. 构建完整时间 × id 组合
-        full_index = pd.DataFrame(product(all_ids, all_times), columns=['id', 'time'])
 
-        # 4. 合并 O_flow 和 D_flow，并填 0
-        o_full = full_index.merge(o_flow_df, on=['id', 'time'], how='left').fillna({'O_flow': 0})
-        d_full = full_index.merge(d_flow_df, on=['id', 'time'], how='left').fillna({'D_flow': 0})
 
-        # 5. 合并 O_flow 和 D_flow
-        merged_df = pd.merge(o_full[['id', 'time', 'O_flow']],
-                            d_full[['id', 'time', 'D_flow']],
-                            on=['id', 'time'],
-                            how='outer')
+        if self.if_all:
+            all_ids = [i for i in range(self.area_dic[study_area])]
+            all_times = [i for i in range(96)]
+            # 3. 构建完整时间 × id 组合
+            full_index = pd.DataFrame(product(all_ids, all_times), columns=['id', 'time'])
+            # 4. 合并 O_flow 和 D_flow，并填 0
+            o_full = full_index.merge(o_flow_df, on=['id', 'time'], how='left').fillna({'O_flow': 0})
+            d_full = full_index.merge(d_flow_df, on=['id', 'time'], how='left').fillna({'D_flow': 0})
 
+            # 5. 合并 O_flow 和 D_flow
+            merged_df = pd.merge(o_full[['id', 'time', 'O_flow']],
+                                d_full[['id', 'time', 'D_flow']],
+                                on=['id', 'time'],
+                                how='outer')
+        else:
+            # 直接按 id + time 合并
+            merged_df = pd.merge(o_flow_df, d_flow_df, on=['id', 'time'], how='outer')
         # 6. 填充缺失值（极端情况下）
-        merged_df['O_flow'] = merged_df['O_flow'].fillna(0)
-        merged_df['D_flow'] = merged_df['D_flow'].fillna(0)
+        merged_df['O_flow'] = merged_df['O_flow'].fillna(0).astype(int)
+        merged_df['D_flow'] = merged_df['D_flow'].fillna(0).astype(int)
 
         # 7. 排序并重置索引
         merged_df = merged_df.sort_values(by=['id', 'time']).reset_index(drop=True)
@@ -108,8 +112,9 @@ class ODMatrix():
         print(f"文件 {csv_file} 已处理并保存为 {output_file}")
 
 if __name__ == "__main__":
-    area_dic = {'村级': {'福州': 3164, '厦门': 712, '漳州': 2212, '泉州': 3053, '宁德': 2603, '莆田': 1165}}
-    width = "村级"
+    area_dic = {'村级': {'福州': 3164, '厦门': 712, '漳州': 2212, '泉州': 3053, '宁德': 2603, '莆田': 1165},
+                '200': {'福州': 366050,'厦门': 48959,'漳州': 380951,'泉州': 344496,'宁德': 413610,'莆田': 121124}}
+    width = "200"
     
     odMatrix_config = edict({
         'input_OD_folder': f'H:\结果数据\OD流量\{width}', # OD文件数据路径
@@ -117,6 +122,7 @@ if __name__ == "__main__":
         'output_folder': f'H:\结果数据\OD聚合\{width}', # OD流输出路径
         'area_dic': area_dic[width],
         'if_month': True, # 是否按照月份分类
+        'if_all': False, # 是否按照月份分类
         'processes': 12 # 并发线程数量
     })
     # 批量提取OD数据
