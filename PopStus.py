@@ -86,17 +86,16 @@ class Pop():
         population_counts = new_points.groupby(['FID', 'time'])['ID'].nunique().reset_index(name='population')       
         population_counts.to_csv(output_file, index=False, header=True)
 
-
 if __name__ == "__main__":
 
     cities = ["福州", "厦门", "漳州", "泉州", "宁德", "莆田"]  # 所有城市列表
     for area in cities:
         pop_config = edict({
-            'Area_path': fr"E:\四大城市\格网\200\{area}.shp",  # 城市格网矢量文件路径
-            'input_folder': f'H:\结果数据\停留点\{area}',  # 停留点数据路径
-            'output_folder': r'H:\结果数据\格网映射\200',  # OD文件输出路径
+            'Area_path': fr"H:\研究区\村级\{area}.shp",  # 城市格网矢量文件路径
+            'input_folder': r'H:\结果数据\漂移清洗\福州\5月',  # 停留点数据路径
+            'output_folder': r'H:\结果数据\区域人口统计\村级',  # OD文件输出路径
             'if_month': True,  # 是否按照月份分类
-            'processes': 5  # 并发进程数量
+            'processes': 1  # 并发进程数量
         })
         # 处理当前城市
         Pop(pop_config).process()
